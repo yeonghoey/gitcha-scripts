@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+python generate_dummy_data.py > gen1.log output1.json       0 1000000 &
+python generate_dummy_data.py > gen2.log output2.json 1000000 2000000 &
+python generate_dummy_data.py > gen3.log output3.json 2000000 3000000 &
