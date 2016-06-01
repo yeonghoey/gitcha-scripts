@@ -2,13 +2,11 @@ import sys
 import random
 import predictionio
 
-FILE_NAME = 'dummy_data.json'
-MAX_USER = 20000000
 MAX_REPO = 50000000
 
-def main():
-    exporter = new_exporter(FILE_NAME)
-    for user_id in range(MAX_USER):
+def main(file_name, user_begin, user_end):
+    exporter = new_exporter(file_name)
+    for user_id in range(user_begin, user_end):
         items = new_items()
         print 'user {} has {} items'.format(user_id, len(items))
         for item_id in items:
@@ -39,4 +37,9 @@ def new_event(exporter, user_id, item_id):
         target_entity_id=item_id)
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) != 4:
+        print 'usage: python %s <outfile> <user_begin> <user_end>' % __file__
+        exit(1)
+
+    file_name, user_begin, user_end = sys.argv[1:]
+    main(file_name, int(user_begin), int(user_end))
