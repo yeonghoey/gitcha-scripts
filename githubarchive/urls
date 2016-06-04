@@ -4,19 +4,16 @@
 from __future__ import print_function
 import sys
 from datetime import datetime, timedelta
-import pytz
 
 COMMAND='http://data.githubarchive.org/{date}-{hour}.json.gz'
 
-def urls_for_last(days):
-    today = datetime.now(pytz.utc).date()
+def urls_for_last(begin, end):
     _1day = timedelta(days=1)
-
-    d = today - timedelta(days=days)
-    while d != today:
-        d += _1day
+    d = begin
+    while d != end:
         for line in urls_for_date(d):
             print(line)
+        d += _1day
 
 def urls_for_date(date):
     str_date = date.strftime('%Y-%m-%d')
@@ -25,8 +22,10 @@ def urls_for_date(date):
         yield COMMAND.format(date=str_date, hour=str_hour)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('usage: %s <days>' % __file__, file=sys.stderr)
+    if len(sys.argv) != 3:
+        print('usage: %s <begin> <end>' % __file__, file=sys.stderr)
+        print("<begin>, <end>: formatted in 'YYYY-MM-DD'", file=sys.stderr)
         exit(1)
-    days = int(sys.argv[1])
-    urls_for_last(days)
+    begin  = datetime.strptime(sys.argv[1], '%Y-%m-%d').date()
+    end  = datetime.strptime(sys.argv[2], '%Y-%m-%d').date()
+    urls_for_last(begin, end)

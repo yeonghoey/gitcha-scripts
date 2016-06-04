@@ -6,41 +6,20 @@ import sys
 import re
 import predictionio
 
-
-# > Username may only contain alphanumeric characters or single hyphens,
-# > and cannot begin or end with a hyphen and is already taken
-# \w contains '_' so defined alphanumeric chracters class by my hand;
-USER = r'({0}|{0}({0}|-)*{0})'.format(r'[a-zA-Z0-9]') 
-
-# I couldn't find any documentation about github's valid name identifier;
-# I've made little manual tests and found out that it accepts 
-# alpanumeric,dash without begin/end restriction
-REPO = r'(%s/(\w|-)+)' % USER
-
-LINE = r'(?P<user>{user})\t(?P<repo>{repo})\s*'
-LINE_RE = re.compile(LINE.format(user=USER, repo=REPO))
-
-
 def main(file_name):
     exporter = predictionio.FileExporter(file_name=file_name)
     count = 0
     for line in sys.stdin:
-        user, repo = parse(line)
+        user, repo = line.strip().split('\t')
         if user and repo:
             new_event(exporter, user, repo)
             count += 1
-            print("'{user}' starred '{repo}'".format(user=user, repo=repo))
+            print("'{user}' - '{repo}'".format(user=user, repo=repo))
+        else:
+            print('FAILED: %s' % line, file=sys.stderr)
     exporter.close()
-    print('created: %s' % str(count))
+    print('count: %d' % count)
         
-def parse(line):
-    ret = LINE_RE.match(line)
-    if ret:
-        d = ret.groupdict()
-        return d['user'], d['repo']
-    else:
-        return None, None
-
 def new_event(exporter, user_id, item_id):
     exporter.create_event(
         event="star",
@@ -49,33 +28,5 @@ def new_event(exporter, user_id, item_id):
         target_entity_type="item",
         target_entity_id=item_id)
 
-def test():
-    assert LINE_RE.match('1\to/o')
-    assert LINE_RE.match('a\to/o')
-
-    assert     LINE_RE.match('a-a\to/o')
-    assert not LINE_RE.match('a_a\to/o')
-
-    assert not LINE_RE.match('notab')
-    assert not LINE_RE.match('-a\to/o')
-    assert not LINE_RE.match('a-\to/o')
-    assert not LINE_RE.match('a_\to/o')
-    assert not LINE_RE.match('_a_\to/o')
-
-    assert     LINE_RE.match('o\ta-a/o')
-    assert not LINE_RE.match('o\t-a/o')
-    assert not LINE_RE.match('o\ta-/o')
-    assert not LINE_RE.match('o\t_a/o')
-    assert not LINE_RE.match('o\ta_/o')
-
-    assert     LINE_RE.match('o\to/o')
-    assert     LINE_RE.match('o\to/-')
-    assert     LINE_RE.match('o\to/-a-')
-    assert     LINE_RE.match('o\to/_a_')
-    assert not LINE_RE.match('o\to')
-    assert not LINE_RE.match('o\to/*')
-    assert not LINE_RE.match('o\to//')
-
 if __name__ == '__main__':
-    test()
     main('out.json')

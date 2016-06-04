@@ -34,9 +34,13 @@ def download(url):
         return wget.download(url, bar=None)
 
 def gzcontent(gzfile):
-    with gzip.open(gzfile, 'rb') as f:
-        for line in f:
-            yield line
+    try:
+        with gzip.open(gzfile, 'rb') as f:
+            for line in f:
+                yield line
+    except IOError:
+        print("FAILED: '%s' is invalid. delete it" % gzfile, file=sys.stderr)
+        os.remove(gzfile)
 
 def parse_starred(event):
     """See: https://developer.github.com/v3/activity/events/types/#watchevent"""
