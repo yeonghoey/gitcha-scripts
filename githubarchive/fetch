@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import sys
 import gzip
+import json
 import wget
 
 def main(work_dir):
@@ -12,7 +13,10 @@ def main(work_dir):
     for line in sys.stdin:
         url = line.strip()
         gzfile = download(url)
-        print(gzcontent(gzfile))
+        for event in gzcontent(gzfile):
+            user, repo = parse_starred(event)
+            if user and repo:
+                print('%s\t%s' % (user, repo))
 
 def change_work_dir(target):
     if not os.path.exists(target):
@@ -23,11 +27,24 @@ def change_work_dir(target):
     os.chdir(target)
 
 def download(url):
-    return wget.download(url, bar=None)
+    expecting_filename = url.rsplit('/', 1)[-1]
+    if os.path.exists(expecting_filename):
+        return expecting_filename
+    else:
+        return wget.download(url, bar=None)
 
 def gzcontent(gzfile):
     with gzip.open(gzfile, 'rb') as f:
-        return f.read()
+        for line in f:
+            yield line
+
+def parse_starred(event):
+    """See: https://developer.github.com/v3/activity/events/types/#watchevent"""
+    ev = json.loads(event)
+    if ev['type'] == 'WatchEvent':
+        return ev['actor']['login'], ev['repo']['name']
+    else:
+        return None, None
 
 if __name__ == '__main__':
     main('downloads')
