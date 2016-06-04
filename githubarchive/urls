@@ -21,7 +21,7 @@ def urls_for_last(days):
 def urls_for_date(date):
     str_date = date.strftime('%Y-%m-%d')
     for i in xrange(0, 24):
-        str_hour = '{:02d}'.format(i)
+        str_hour = int(i)
         yield COMMAND.format(date=str_date, hour=str_hour)
 
 if __name__ == '__main__':
