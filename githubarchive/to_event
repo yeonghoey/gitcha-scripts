@@ -29,4 +29,9 @@ def new_event(exporter, user_id, item_id):
         target_entity_id=item_id)
 
 if __name__ == '__main__':
-    main('out.json')
+    if len(sys.argv) != 2:
+        print('usage: %s <outfile>' % __file__, file=sys.stderr)
+        exit(1)
+
+    file_name = sys.argv[1]
+    main(file_name)
