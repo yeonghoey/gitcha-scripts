@@ -339,7 +339,7 @@ cat <<EOF > ${hadoop_dir}/etc/hadoop/hdfs-site.xml
 EOF
 
 
-echo "${private_dns}" > $hadoop_dir/etc/slaves
+echo "${private_dns}" > $hadoop_dir/etc/hadoop/slaves
 
 echo "Format hdfs namenode"
 $hadoop_dir/bin/hdfs namenode -format
