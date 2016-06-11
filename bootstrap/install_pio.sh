@@ -110,10 +110,10 @@ while true; do
   echo "You are going to install PredictionIO to: $pio_dir"
   echo -e "Vendor applications will go in: $vendors_dir\n"
   echo "Spark: $spark_dir"
-  echo "Haddop: $hadoop_dir"
   echo "Elasticsearch: $elasticsearch_dir"
   echo "HBase: $hbase_dir"
   echo "ZooKeeper: $zookeeper_dir"
+  echo "Hadoop: $hadoop_dir"
   echo "--------------------------------------------------------------------------------"
   if confirm "\033[1mIs this correct?\033[0m"; then
     break;
@@ -362,6 +362,7 @@ echo -e "\033[1;32mInstallation of PredictionIO $PIO_VERSION complete!\033[0m"
 echo -e "\033[1;32mPlease follow documentation at http://docs.prediction.io/start/download/ to download the engine template based on your needs\033[0m"
 echo -e
 echo -e "\033[1;33mCommand Line Usage Notes:\033[0m"
+echo -e "To start PredictionIO and dependencies, run: '\033[1m${hadoop_dir}/sbin/start-dfs.sh\033[0m' and then,"
 echo -e "To start PredictionIO and dependencies, run: '\033[1mpio-start-all\033[0m'"
 echo -e "To check the PredictionIO status, run: '\033[1mpio status\033[0m'"
 echo -e "To train/deploy engine, run: '\033[1mpio [train|deploy|...]\033[0m' commands"
