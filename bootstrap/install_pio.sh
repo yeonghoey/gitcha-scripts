@@ -16,8 +16,6 @@ HADOOP_VERSION=2.4.1
 # Looks like support for Elasticsearch 2.0 will require 2.0 so deferring
 ELASTICSEARCH_VERSION=1.7.3
 HBASE_VERSION=1.1.4 # 
-POSTGRES_VERSION=9.4-1204.jdbc41
-MYSQL_VERSION=5.1.37
 PIO_DIR=$HOME/PredictionIO
 USER_PROFILE=$HOME/.profile
 PIO_FILE=PredictionIO-${PIO_VERSION}.tar.gz
@@ -26,8 +24,6 @@ TEMP_DIR=/tmp
 DISTRO_DEBIAN="Debian/Ubuntu"
 DISTRO_OTHER="Other"
 
-PGSQL="PostgreSQL"
-MYSQL="MySQL"
 ES_HB="Elasticsearch + HBase"
 
 # Ask a yes/no question, with a default of "yes".
@@ -217,17 +213,6 @@ ${SED_CMD} "s|SPARK_HOME=.*|SPARK_HOME=$spark_dir|g" ${pio_dir}/conf/pio-env.sh
 
 echo -e "\033[1;32mSpark setup done!\033[0m"
 
-# Hadoop
-echo -e "\033[1;36mStarting Hadoop setup in:\033[0m $hadoop_dir"
-if [[ ! -e hadoop-${HADOOP_VERSION}.tar.gz ]]; then
-  echo "Downloading Hadoop..."
-  curl -O http://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
-fi
-tar zxf hadoop-${HADOOP_VERSION}.tar.gz
-rm -rf ${hadoop_dir}
-mv hadoop-${HADOOP_VERSION} ${hadoop_dir}
-
-echo -e "\033[1;32mHadoop setup done!\033[0m"
 
 # Elasticsearch
 echo -e "\033[1;36mStarting Elasticsearch setup in:\033[0m $elasticsearch_dir"
@@ -287,6 +272,22 @@ ${SED_CMD} "s|PIO_STORAGE_SOURCES_HBASE_HOME=.*|PIO_STORAGE_SOURCES_HBASE_HOME=$
 ${SED_CMD} "s|# HBASE_CONF_DIR=.*|HBASE_CONF_DIR=$hbase_dir/conf|" ${pio_dir}/conf/pio-env.sh
 
 echo -e "\033[1;32mHBase setup done!\033[0m"
+
+# Hadoop
+echo -e "\033[1;36mStarting Hadoop setup in:\033[0m $hadoop_dir"
+if [[ ! -e hadoop-${HADOOP_VERSION}.tar.gz ]]; then
+  echo "Downloading Hadoop..."
+  curl -O http://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+fi
+tar zxf hadoop-${HADOOP_VERSION}.tar.gz
+rm -rf ${hadoop_dir}
+mv hadoop-${HADOOP_VERSION} ${hadoop_dir}
+
+echo "Updating: $hadoop_dir/etc/hadoop/hadoop-env.sh to include $JAVA_HOME"
+${SED_CMD} "s|export JAVA_HOME=.*|export JAVA_HOME=$JAVA_HOME|" $hadoop_dir/etc/hadoop/hadoop-env.sh
+
+echo -e "\033[1;32mHadoop setup done!\033[0m"
+
 
 
 echo "Updating permissions on: $vendors_dir"
