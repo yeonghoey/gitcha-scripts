@@ -74,6 +74,13 @@ while true; do
   read -e -p "Vendor path ($pio_dir/vendors): " vendors_dir
   vendors_dir=${vendors_dir:-$pio_dir/vendors}
 
+  read -e -p "Private DNS (localhost): " private_dns
+  ssh -q ${private_dns} exit
+  if [[ $? -ne 0 ]] ; then
+    echo "$private_dns should be accessible with 'ssh ${private_dns}'"
+    exit 1
+  fi
+
   if confirm "Receive updates?"; then
     guess_email=''
     if hash git 2>/dev/null; then
@@ -250,18 +257,31 @@ rm -rf ${hbase_dir}
 mv hbase-${HBASE_VERSION} ${hbase_dir}
 
 echo "Creating default site in: $hbase_dir/conf/hbase-site.xml"
-cat <<EOT > ${hbase_dir}/conf/hbase-site.xml
+cat <<EOF > ${hbase_dir}/conf/hbase-site.xml
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>file://${hbase_dir}/data</value>
+    <value>hdfs://${private_dns}:9000/hbase</value>
+  </property>
+  <property>
+    <name>hbase.cluster.distributed</name>
+    <value>true</value>
   </property>
   <property>
     <name>hbase.zookeeper.property.dataDir</name>
-    <value>${zookeeper_dir}</value>
+    <value>hdfs://${private_dns}:9000/zookeeper</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>${private_dns}</value>
+  </property>
+  <property>
+    <name>hbase.zookeeper.property.clientPort</name>
+    <value>2181</value>
   </property>
 </configuration>
-EOT
+EOF
+echo "${private_dns}" > ${hbase_dir}/conf/regionservers
 
 echo "Updating: $hbase_dir/conf/hbase-env.sh to include $JAVA_HOME"
 ${SED_CMD} "s|# export JAVA_HOME=/usr/java/jdk1.6.0/|export JAVA_HOME=$JAVA_HOME|" ${hbase_dir}/conf/hbase-env.sh
@@ -285,6 +305,44 @@ mv hadoop-${HADOOP_VERSION} ${hadoop_dir}
 
 echo "Updating: $hadoop_dir/etc/hadoop/hadoop-env.sh to include $JAVA_HOME"
 ${SED_CMD} "s|export JAVA_HOME=.*|export JAVA_HOME=$JAVA_HOME|" $hadoop_dir/etc/hadoop/hadoop-env.sh
+
+echo "export HADOOP_COMMON_LIB_NATIVE_DIR=${hadoop_dir}/lib/native" >> $hadoop_dir/etc/hadoop/hadoop-env.sh
+echo "export HADOOP_OPTS='-Djava.library.path=${hadoop_dir}/lib'" >> $hadoop_dir/etc/hadoop/hadoop-env.sh
+
+
+cat <<EOF > ${hadoop_dir}/etc/hadoop/core-site.xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://${private_dns}:9000</value>
+  </property>
+</configuration>
+EOF
+
+cat <<EOF > ${hadoop_dir}/etc/hadoop/hdfs-site.xml
+<configuration>
+  <property>
+    <name>dfs.name.dir</name>
+    <value>${hadoop_dir}/dfs/name</value>
+    <final>true</final>
+  </property>
+  <property>
+    <name>dfs.data.dir</name>
+    <value>${hadoop_dir}/dfs/data</value>
+    <final>true</final>
+  </property>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+</configuration>
+EOF
+
+
+echo "${private_dns}" > $hadoop_dir/etc/slaves
+
+echo "Format hdfs namenode"
+$hadoop_dir/bin/hdfs namenode -format
 
 echo -e "\033[1;32mHadoop setup done!\033[0m"
 
