@@ -232,9 +232,6 @@ tar zxf elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz
 rm -rf ${elasticsearch_dir}
 mv elasticsearch-${ELASTICSEARCH_VERSION} ${elasticsearch_dir}
 
-echo "Updating: $elasticsearch_dir/config/elasticsearch.yml"
-echo 'network.host: 127.0.0.1' >> ${elasticsearch_dir}/config/elasticsearch.yml
-
 echo "Updating: $pio_dir/conf/pio-env.sh"
 ${SED_CMD} "s|PIO_STORAGE_REPOSITORIES_METADATA_SOURCE=PGSQL|PIO_STORAGE_REPOSITORIES_METADATA_SOURCE=ELASTICSEARCH|" ${pio_dir}/conf/pio-env.sh
 ${SED_CMD} "s|PIO_STORAGE_REPOSITORIES_MODELDATA_SOURCE=PGSQL|PIO_STORAGE_REPOSITORIES_MODELDATA_SOURCE=LOCALFS|" ${pio_dir}/conf/pio-env.sh
