@@ -30,11 +30,12 @@ def new_item_id():
 
 def new_event(exporter, user_id, item_id):
     exporter.create_event(
-        event="star",
-        entity_type="user",
+        event='star',
+        entity_type='user',
         entity_id=user_id,
-        target_entity_type="item",
-        target_entity_id=item_id)
+        target_entity_type='item',
+        target_entity_id=item_id,
+        event_time=None)
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
