@@ -227,6 +227,8 @@ tar zxf hadoop-${HADOOP_VERSION}.tar.gz
 rm -rf ${hadoop_dir}
 mv hadoop-${HADOOP_VERSION} ${hadoop_dir}
 
+echo -e "\033[1;32mHadoop setup done!\033[0m"
+
 # Elasticsearch
 echo -e "\033[1;36mStarting Elasticsearch setup in:\033[0m $elasticsearch_dir"
 if [[ ! -e elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz ]]; then
