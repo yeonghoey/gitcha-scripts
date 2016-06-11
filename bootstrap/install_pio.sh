@@ -132,7 +132,7 @@ select distribution in "$DISTRO_DEBIAN" "$DISTRO_OTHER"; do
 done
 
 # Java Install
-if [[ ${OS} = "Linux" ]] && confirm "\033[1mWould you like to install Java?\033[0m"; then
+if [[ ${OS} = "Linux" ]] ; then
   case ${distribution} in
     "$DISTRO_DEBIAN")
       echo -e "\033[1;36mStarting Java install...\033[0m"
