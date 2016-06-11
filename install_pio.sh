@@ -241,6 +241,12 @@ ${SED_CMD} "s|# PIO_STORAGE_SOURCES_LOCALFS|PIO_STORAGE_SOURCES_LOCALFS|" ${pio_
 ${SED_CMD} "s|# PIO_STORAGE_SOURCES_ELASTICSEARCH_TYPE|PIO_STORAGE_SOURCES_ELASTICSEARCH_TYPE|" ${pio_dir}/conf/pio-env.sh
 ${SED_CMD} "s|# PIO_STORAGE_SOURCES_ELASTICSEARCH_HOME=.*|PIO_STORAGE_SOURCES_ELASTICSEARCH_HOME=$elasticsearch_dir|" ${pio_dir}/conf/pio-env.sh
 
+echo "Updating: ${elasticsearch_dir}/config/elasticsearch.yml"
+${SED_CMD} "s|#discovery.zen.ping.multicast.enabled: false|discovery.zen.ping.multicast.enabled: false|" ${elasticsearch_dir}/config/elasticsearch.yml
+${SED_CMD} "s|#discovery.zen.ping.unicast.hosts:.*|discovery.zen.ping.unicast.hosts: [\"${private_dns}\"]|" ${elasticsearch_dir}/config/elasticsearch.yml
+
+
+
 echo -e "\033[1;32mElasticsearch setup done!\033[0m"
 
 # HBase
